@@ -1,0 +1,152 @@
+{
+  "name": "DeCON_dev0",
+  "title": "DeCON_dev0",
+  "summary": "Dx wrapper to run the DeCON CNV caller",
+  "dxapi": "1.0.0",
+  "version": "0.0.1",
+  "inputSpec": [
+    {
+      "name": "bam_list",
+      "label": "list of sample names",
+      "class": "file",
+      "optional": true,
+      "patterns": ["*.txt"],
+      "help": "a txt file of one sample_name.bam per line, there should be a sample.bam and a sample.bai file in the directory"
+    },
+    {
+      "name": "target_bed",
+      "label": "targeted 1-based BED file",
+      "class": "file",
+      "optional": true,
+      "patterns": ["*.bed"],
+      "help": "sorted in chromosome order, no header but tab-separated columns for chrom→start→end→gene"
+    },
+    {
+      "name": "ref_gen",
+      "label": "FASTA reference genome",
+      "class": "file",
+      "optional": true,
+      "patterns": ["*.fa", "*.fa.gz"],
+      "help": ""
+    },
+    {
+      "name": "prefix",
+      "label": "output prefix",
+      "class": "string",
+      "optional": false,
+      "help": ""
+    },
+    {
+      "name": "exon_num_tsv",
+      "label": "exon numbering tsv file for annotation ",
+      "class": "file",
+      "optional": true,
+      "patterns": [
+        "*"
+      ],
+      "help": ""
+    },
+    {
+      "name": "custom_report",
+      "label": "whether to generate output with custom annotation",
+      "class": "boolean",
+      "optional": true,
+      "default": false,
+      "help": ""
+    },
+    {
+      "name": "mincorr",
+      "label": "minimum correlation threshold",
+      "class": "float",
+      "optional": true,
+      "default": 0.98,
+      "help": ""
+    },
+    {
+      "name": "mincov",
+      "label": "minimum coverage threshold",
+      "class": "int",
+      "optional": true,
+      "default": 100,
+      "help": ""
+    },
+    {
+      "name": "trans_prob",
+      "label": "transition probability in HMM",
+      "class": "float",
+      "optional": true,
+      "default": 0.01,
+      "help": ""
+    }
+  ],
+  "outputSpec": [
+    {
+      "name": "sample_coverage",
+      "label": ".RData file of sample names and coverage values",
+      "class": "file",
+      "patterns": ["*.RData"]
+    },
+    {
+      "name": "failures",
+      "label": "tsv of samples below threshold",
+      "class": "file",
+      "patterns": ["*.txt"]
+    },
+    {
+      "name": "summary_RData",
+      "label": "containing the FPKM for each sample and exon, all CNV calls, and quality control information",
+      "class": "file",
+      "patterns": ["*.RData"]
+    },
+    {
+      "name": "CNV_calls",
+      "label": "tsv detailing all exon CNV calls with 15 columns",
+      "class": "file",
+      "patterns": ["*.txt"]
+    }
+  ],
+  "runSpec": {
+    "timeoutPolicy": {
+      "*": {
+        "hours": 3
+      }
+    },
+    "execDepends": [
+      {
+        "name": "r-base",
+        "package_manager": "apt",
+        "version": "3.1.2"
+      },
+      {
+        "name": "build-essential",
+        "package_manager": "apt",
+        "version": "7.5.0"
+      },
+      {
+        "name": "gfortran",
+        "package_manager": "apt",
+        "version": "7.5.0"
+      }
+    ],
+    "interpreter": "bash",
+    "release": "16.04",
+    "distribution": "Ubuntu",
+    "file": "src/DeCON_dev0.sh",
+    "version": "1"
+  },
+  "access": {
+    "allProjects":"VIEW",
+    "network": [
+      "*"
+    ]
+  },
+  "regionalOptions": {
+    "aws:eu-central-1": {
+      "systemRequirements": {
+        "*": {
+          "instanceType": "mem1_ssd1_v2_x4"
+        }
+      }
+    }
+  }
+}
