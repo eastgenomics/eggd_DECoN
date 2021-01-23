@@ -6,7 +6,7 @@ bin-release/
 
 # Other files and folders
 .settings/
-resources/home/dnanexus/decon.tar.gz
+resources/home/dnanexus/DECoN.tar.gz
 
 # Executables
 *.swf
@@ -18,3 +18,4 @@ resources/home/dnanexus/decon.tar.gz
 # Project files, i.e. `.project`, `.actionScriptProperties` and `.flexProperties`
 # should NOT be excluded as they contain compiler settings and other important
 # information for Eclipse / Flash Builder.
+resources/run_decon.sh
