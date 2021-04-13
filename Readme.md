@@ -14,9 +14,9 @@ This app may be executed as a standalone app or as part of an analysis pipeline.
 
 ## What data are required for this app to run?
 This app requires
-* full path of a dx folder that contains sample.bam and sample.bai files in the same directory
+* array of sample.bam and sample.bai files (in the same directory)
 * output prefix (eg. run name/date, etc)
-* targeted 1-based BED file, orted in chromosome order, no header but tab-separated columns for chrom→start→end→gene 
+* targeted 1-based BED file (sorted in chromosome order, no header but tab-separated columns for chrom→start→end→gene)
 * reference genome FASTA file
 * exon numbering tsv file for annotation (optional)
 * true/FALSE whether custom exon annotation is provided and custom reports should be generated (defaults to false)

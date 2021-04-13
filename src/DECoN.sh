@@ -11,8 +11,6 @@
 main() {
 
     ## Confirm that inputs are read in appropriately:
-    echo "Input folder of bams: '$input_folder'"
-    echo "Make custom_report: '$custom_report'"
     echo "Output prefix: '$prefix'"
     echo "Minimum correlation: '$min_corr'"
     echo "Minimum coverage: '$min_cov'x"
@@ -24,16 +22,26 @@ main() {
     # mkdir decon
     tar -xzf DECoN.tar.gz # will unpack into /home/dnanexus
     bash setup.sh
-    echo "DECoN install finished with output:"
-    tail -5 setup.log
+    echo "DECoN install finished:" #with output
+    # tail -5 setup.log
 
     ## Download input files as provided or their defaults
-    if [ -n "$target_bed" ]   # target.bed
-    then
-        dx download "$target_bed" -o target.bed
-    else # download the default #003_Cancer project
-        dx download project-Fkp9vjj4YFK078JQ4pyb5Qy0:file-Fv2gVXj4YFKBF0v26f0G8vpP -o target.bed
-    fi
+    dx download "$target_bed" -o target.bed
+
+    ## Download all input bam and bai files
+    for i in ${!input_bambis[@]}
+    do
+        dx download "${input_bambis[$i]}" 
+    done
+
+    # generate sample list of a folder provided
+    ls *.bam > bam_list.txt
+    # head -10 bam_list.txt
+
+    # Rename .bam.bai files to .bai
+    for f in *.bam.bai; do 
+        mv -- "$f" "${f%.bam.bai}.bai"
+    done
 
     if [ -n "$ref_gen" ]      # ref_gen.fa.gz
     then
@@ -43,16 +51,6 @@ main() {
     fi # unzip the gzipped FASTA file
     gunzip ref_gen.fa.gz # surprisingly takes forever
 
-    ## Download all input bam and bai files
-    dx download --all "$DX_PROJECT_CONTEXT_ID":/"$input_folder"/*.bam
-    # generate sample list of a folder provided
-    ls *.bam > bam_list.txt
-
-    dx download --all "$DX_PROJECT_CONTEXT_ID":/"$input_folder"/*.bai
-    # Rename .bam.bai files to .bai
-    for f in *.bam.bai; do 
-        mv -- "$f" "${f%.bam.bai}.bai"
-    done
     echo "All input files have been downloaded"
 
     ## Run DECoN tool on samples
@@ -69,22 +67,16 @@ main() {
     # takes the bambi.RData generated in the previous step, trans_prob, exon_num, cust_rep, prefix (input), plot_sel="Custom", default plot folder name "DECoNPlots"
     # outputs a prefix.RData, prefix_all.txt, plots in the DECoNPlots folder
 
-    if [ $custom_report == "true" ]
-    then # if custom reporting is selected
-        if [ -n "$exon_num_tsv" ]
-        then #exon_num.tsv
-            echo "Custom exon numbering tsv provided"
+    if [ -n "$exon_num_tsv" ]
+    then # if custom exon_num.tsv is provided
+        echo "Custom exon numbering tsv provided, custom report will be generated"
 
-            dx download "$exon_num_tsv" -o exon_num.tsv
-            
-            Rscript IdentifyFailures.R --Rdata bambi.RData --mincorr $min_corr --mincov $min_cov --exons exon_num.tsv --custom $custom_report --out $prefix
+        dx download "$exon_num_tsv" -o exon_num.tsv
+        
+        Rscript IdentifyFailures.R --Rdata bambi.RData --mincorr $min_corr --mincov $min_cov --exons exon_num.tsv --custom TRUE --out $prefix
 
-            Rscript makeCNVcalls.R --Rdata bambi.RData --transProb $trans_prob --exons $exon_num --custom $custom_report --out $prefix --plot Custom --plotFolder DECoNPlots
-        else
-            echo "No custom exon numbering tsv provided"
-            custom_report="false"
-        fi
-    else # custom_report false or not selected
+        Rscript makeCNVcalls.R --Rdata bambi.RData --transProb $trans_prob --exons $exon_num --custom TRUE --out $prefix --plot Custom --plotFolder DECoNPlots
+    else # custom exon numbering is not provided
         echo "No custom reporting selected"
         Rscript IdentifyFailures.R --Rdata bambi.RData --mincorr $min_corr --mincov $min_cov --out $prefix
 
@@ -96,9 +88,8 @@ main() {
     ## Create outdir and move result files in to be uploaded
     outdir=out/result_files && mkdir -p ${outdir}
     mv "$prefix"* ${outdir}/
-    plot_dir=out/plots && mkdir -p ${plot_dir}
     # touch DECoNPlots/noFiles.txt
-    mv DECoNPlots ${plot_dir}/
+    mv DECoNPlots ${outdir}/
     
     # Upload results
     dx-upload-all-outputs

@@ -1,16 +1,25 @@
 {
-  "name": "DECoN_dev4",
-  "title": "DECoN_dev4",
+  "name": "DECoN_dev5",
+  "title": "DECoN_dev5",
   "summary": "Dx wrapper to run the DeCON CNV caller",
   "dxapi": "1.0.0",
   "version": "0.0.1",
   "inputSpec": [
     {
-      "name": "input_folder",
-      "label": "Folder of sample.bam and sample.bai files",
-      "class": "string",
+      "name": "input_bambis",
+      "label": "Bunch of sample.bam AND sample.bai files",
+      "class": "array:file",
       "optional": false,
-      "help": "a txt file of one sample_name.bam per line, there should be a sample.bam and a sample.bai file in the directory"
+      "patterns": ["*.bam", "*.bai"],
+      "help": "Each sample.bam should have a sample.bai file input"
+    },
+    {
+      "name": "target_bed",
+      "label": "targeted 1-based BED file",
+      "class": "file",
+      "optional": false,
+      "patterns": ["*.bed"],
+      "help": "sorted in chromosome order, no header but tab-separated columns for chrom→start→end→gene"
     },
     {
       "name": "prefix",
@@ -26,13 +35,6 @@
       "optional": true,
       "patterns": ["*.tsv", "*.txt"],
       "help": ""
-    },
-    {
-      "name": "custom_report",
-      "label": "whether to generate output with custom annotation",
-      "class": "boolean",
-      "optional": true,
-      "default": false
     },
     {
       "name": "min_corr",
@@ -59,14 +61,6 @@
       "help": ""
     },
     {
-      "name": "target_bed",
-      "label": "targeted 1-based BED file",
-      "class": "file",
-      "optional": true,
-      "patterns": ["*.bed"],
-      "help": "sorted in chromosome order, no header but tab-separated columns for chrom→start→end→gene"
-    },
-    {
       "name": "ref_gen",
       "label": "FASTA reference genome",
       "class": "file",
@@ -78,19 +72,14 @@
   "outputSpec": [
     {
       "name": "result_files",
-      "label": "2 .RData files, a tsv of CNV calls and a failed samples txt",
-      "class": "array:file"
-    },
-    {
-      "name": "plots",
-      "label": "coverage plots",
+      "label": "2 .RData files, a tsv of CNV calls and a failed samples txt and coverage_plot.pdf if generated",
       "class": "array:file"
     }
   ],
   "runSpec": {
     "timeoutPolicy": {
       "*": {
-        "days": 2
+        "hours": 2
       }
     },
     "interpreter": "bash",
